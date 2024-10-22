@@ -8,11 +8,11 @@ same perspective, and be lit from different angles.
 Example
 -------
 
-### Input Data
+### Inputs, Output, and Untextured Render
 
 ![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/normal_map_demo.webp)
 
-### result Videos
+### Animations
 
 [untextured](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4)
 
