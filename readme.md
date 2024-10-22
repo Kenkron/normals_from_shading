@@ -10,19 +10,13 @@ Example
 
 ### Input Data
 
-![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_input/tile_2048_a.jpg)
+![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/normal_map_demo.webp)
 
-![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_2048_b.jpg)
+### result Videos
 
-![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_2048_c.jpg)
+[untextured](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4)
 
-### Output
-
-![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/normal_map.png)
-
-https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4
-
-https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4
+[with texture](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4)
 
 Usage
 -----
