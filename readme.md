@@ -23,8 +23,8 @@ Usage
 
     normals_from_shading [filename...]
 
-Note that the output files will be in linear colorspace,
-not sRGB.
+The output will be stored in normal_map.png, and will be
+in linear colorspace, not sRGB.
 
 Methodology
 -----------
