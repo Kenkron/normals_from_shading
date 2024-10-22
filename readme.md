@@ -12,9 +12,9 @@ Example
 
 ![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_input/tile_2048_a.jpg)
 
-![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_2048_a.jpg)
+![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_2048_b.jpg)
 
-![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_2048_a.jpg)
+![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_2048_c.jpg)
 
 ### Output
 
