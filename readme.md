@@ -61,4 +61,6 @@ ambiguity, and all of the normals might be flipped
 along the x/y axis. This would make bumps look like
 dents, and vice-versa.
 
-Because the initial normal map in
+Because the initial normal map is convex, the algorithm
+will tend to be convex overe all. This is often correct,
+but not always.
