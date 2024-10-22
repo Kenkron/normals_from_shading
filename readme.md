@@ -5,6 +5,25 @@ Creates a normal map from a set of three or more images of
 an object. Images must be the same resolution, have the
 same perspective, and be lit from different angles.
 
+Example
+-------
+
+### Input Data
+
+![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_input/tile_2048_a.jpg)
+
+![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_2048_a.jpg)
+
+![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_2048_a.jpg)
+
+### Output
+
+![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/normal_map.png)
+
+https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4
+
+https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4
+
 Usage
 -----
 
