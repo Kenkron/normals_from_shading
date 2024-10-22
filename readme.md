@@ -8,15 +8,15 @@ same perspective, and be lit from different angles.
 Example
 -------
 
-### Inputs, Output, and Untextured Render
+### Inputs, Output, and Colorless Render
 
 ![image](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/normal_map_demo.webp)
 
 ### Animations
 
-[untextured](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4)
+[Colorless](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4)
 
-[with texture](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4)
+[With Color](https://raw.githubusercontent.com/Kenkron/normals_from_shading/refs/heads/main/sample_output/tile_untextured_small.mp4)
 
 Usage
 -----
