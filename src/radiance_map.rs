@@ -1,12 +1,18 @@
 use image::{self, GenericImageView, ImageReader, ImageResult};
 use na::{DMatrix, Vector2, Vector3};
 
+/// Container for image brightness data and lighting direction.
+///
+/// radiance is stored as an n x 1 matrix of brightness, where
+/// n is the pixel count.
 pub struct RadianceMap {
     pub lighting_direction: Vector3<f32>,
     pub size: Vector2<usize>,
     pub radiance: DMatrix<f32>
 }
 
+/// Creates a radiance map from a dynamic image,
+/// with a lighting direction along the z axis.
 impl From<image::DynamicImage> for RadianceMap {
     fn from(image_data: image::DynamicImage) -> Self {
         let size = Vector2::new(image_data.width() as usize, image_data.height() as usize);
@@ -22,7 +28,8 @@ impl From<image::DynamicImage> for RadianceMap {
 }
 
 impl RadianceMap {
-    pub fn load_rgb(path: &str) -> ImageResult<Self> {
+    /// Load a radiance map from a file
+    pub fn load(path: &str) -> ImageResult<Self> {
         let image = ImageReader::open(path)?.decode()?;
         Ok(RadianceMap::from(image))
     }

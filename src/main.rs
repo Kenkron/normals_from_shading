@@ -7,7 +7,8 @@ use radiance_map::*;
 mod normal_utils;
 use normal_utils::*;
 
-// Find linear least squares solution to Ax = b
+/// Find linear least squares solution to Ax = b
+/// This will return None for an underconstrained system.
 pub fn least_squares(a: &DMatrix<f32>, b: &DMatrix<f32>) -> Option<DMatrix<f32>> {
     let a_transpose = a.transpose();
     let ata = &a_transpose * a;
@@ -20,6 +21,10 @@ pub fn least_squares(a: &DMatrix<f32>, b: &DMatrix<f32>) -> Option<DMatrix<f32>>
 /// Estimating a lighting direction by finding the least squares solution
 /// for (light_direction) of (normals)(light_directions) = (brightness_values)
 /// This is based on phong diffuse shading.
+///
+/// The normal matrix must be an n x 3 matrix where n is the pixel count, and
+/// each row holds the xyz values of the normal. The radiance vector is an
+/// n x 1 matrix holding brightness data for each pixel.
 pub fn generate_lighting_direction(
     normal_matrix: &DMatrix<f32>,
     radiance_vector: &DMatrix<f32>)
@@ -63,7 +68,7 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let mut radiance_maps = Vec::<RadianceMap>::new();
     for path in &args[1..] {
-        radiance_maps.push(RadianceMap::load_rgb(&path)
+        radiance_maps.push(RadianceMap::load(&path)
             .expect(&format!("Could not load image: {}", path)));
     }
 
@@ -115,27 +120,20 @@ fn main() {
         println!("Est light direction: {}" , radiance_map.lighting_direction);
     }
 
-    // Write the normal map
-    let normal_bytes: Vec<u8> = normal_matrix.transpose().iter().map(|channel| {
-        (channel * 128.0 + 128.0) as u8
-    }).collect();
-    let normal_output = RgbImage::from_vec(size[0] as u32, size[1] as u32, normal_bytes)
-        .expect("Normal output wasn't the right size");
-    normal_output.save_with_format("normal_map.png", image::ImageFormat::Png)
-        .expect("Error writing normal map");
-
-    // Write flattened normal map
+    // Flatten normal map
     let mut flattened_normals = normal_matrix;
     for _ in 0..10 {
         flattened_normals = corner_flatten(&flattened_normals, &size);
         // Reorient the normal map to face towards the camera
         flattened_normals = reorient_normals(&flattened_normals);
     }
+
+    // Write flattened normal map
     let normal_bytes: Vec<u8> = flattened_normals.transpose().iter().map(|channel| {
         (channel * 128.0 + 128.0) as u8
     }).collect();
     let normal_output = RgbImage::from_vec(size[0] as u32, size[1] as u32, normal_bytes)
         .expect("Normal output wasn't the right size");
-    normal_output.save_with_format("flattened_normal_map.png", image::ImageFormat::Png)
+    normal_output.save_with_format("normal_map.png", image::ImageFormat::Png)
         .expect("Error writing normal map");
 }
