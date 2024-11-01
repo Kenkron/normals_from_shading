@@ -1,5 +1,7 @@
 use image::{self, GenericImageView, ImageReader, ImageResult};
-use na::{DMatrix, Vector2, Vector3};
+use na::{Vector2, Vector3};
+
+pub type RadianceMatrix = na::Matrix<f32, na::Dyn, na::U1, na::VecStorage<f32, na::Dyn, na::U1>>;
 
 /// Container for image brightness data and lighting direction.
 ///
@@ -8,7 +10,7 @@ use na::{DMatrix, Vector2, Vector3};
 pub struct RadianceMap {
     pub lighting_direction: Vector3<f32>,
     pub size: Vector2<usize>,
-    pub radiance: DMatrix<f32>
+    pub radiance: RadianceMatrix
 }
 
 /// Creates a radiance map from a dynamic image,
@@ -23,7 +25,8 @@ impl From<image::DynamicImage> for RadianceMap {
         Self {
             lighting_direction: Vector3::<f32>::z(),
             size,
-            radiance: DMatrix::from_row_slice(greyscale.len(), 1, &greyscale)}
+            radiance: RadianceMatrix::from_row_slice(&greyscale)
+        }
     }
 }
 

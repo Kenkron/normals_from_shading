@@ -1,7 +1,9 @@
-use na::{DMatrix, Matrix3, Matrix4, Rotation3, RowDVector, Vector2, Vector3};
+use na::{DMatrix, Matrix3, Rotation3, Vector2, Vector3};
+
+pub type NormalMatrix = na::Matrix<f32, na::Dyn, na::U3, na::VecStorage<f32, na::Dyn, na::U3>>;
 
 // Rotates normals so their average points upwards
-pub fn reorient_normals(normals: &DMatrix<f32>) -> DMatrix<f32> {
+pub fn reorient_normals(normals: &NormalMatrix) -> NormalMatrix {
     let average_normal_raw = normals.row_mean().normalize();
     let average_normal = Vector3::from_row_slice(average_normal_raw.as_slice());
     let rotation = Rotation3::rotation_between(&average_normal, &Vector3::z());
@@ -15,38 +17,18 @@ pub fn reorient_normals(normals: &DMatrix<f32>) -> DMatrix<f32> {
 
     let rotation_matrix: Matrix3<f32> =rotation.into();
     let new_normals = rotation_matrix * normals.transpose();
-    let normals_dmat = DMatrix::from_column_slice(
-        new_normals.nrows(), new_normals.ncols(), new_normals.as_slice());
-    normals_dmat.transpose()
+    NormalMatrix::from_column_slice(new_normals.transpose().as_slice())
 }
 
-// Finds the average normal corners of the edges of the image.
-// Normals are then rotated with linear interpolation between the corners.
-// Note that this assumes edge normals face forwards.
-// If the edges match their opposites, but are not necessarily flat,
-// reorient normals may be used to attempt to compensate
-pub fn corner_flatten(normals: &DMatrix<f32>, size: &Vector2<usize>) -> DMatrix<f32> {
+pub fn normal_tilt(
+    normals: &NormalMatrix,
+    size: &Vector2<usize>,
+    upper_left: &Vector3<f32>,
+    upper_right: &Vector3<f32>,
+    lower_left: &Vector3<f32>,
+    lower_right: &Vector3<f32>)
+-> NormalMatrix {
     let i_to_xy = |i: usize| (i % size[0], i / size[0]);
-    let top = normals.view_range(0..size[0], 0..3);
-    let bottom = normals.view_range(normals.nrows() - size[0]..normals.nrows(), 0..3);
-    let left = normals.rows_with_step(0, size[1], size[0]);
-    let right = normals.rows_with_step(size[0] - 1, size[1]-1, size[0]);
-    let upper_left =
-        top.view_range(0..top.nrows()/2, 0..3).row_sum() +
-        left.view_range(0..left.nrows()/2, 0..3).row_sum();
-    let upper_left = upper_left.normalize();
-    let lower_left =
-        bottom.view_range(0..bottom.nrows()/2, 0..3).row_sum() +
-        left.view_range(left.nrows()/2..left.nrows(), 0..3).row_sum();
-    let lower_left = lower_left.normalize();
-    let upper_right =
-        top.view_range(top.nrows()/2..top.nrows(), 0..3).row_sum() +
-        right.view_range(0..left.nrows()/2, 0..3).row_sum();
-    let upper_right = upper_right.normalize();
-    let lower_right =
-        bottom.view_range(bottom.nrows()/2..bottom.nrows(), 0..3).row_sum() +
-        right.view_range(right.nrows()/2..right.nrows(), 0..3).row_sum();
-    let lower_right = lower_right.normalize();
     let mut result = normals.clone();
     for i in 0..result.nrows() {
         // get coordinates as a fraction of the image size
@@ -74,12 +56,41 @@ pub fn corner_flatten(normals: &DMatrix<f32>, size: &Vector2<usize>) -> DMatrix<
     result
 }
 
+// Finds the average normal corners of the edges of the image.
+// Normals are then rotated with linear interpolation between the corners.
+// Note that this assumes edge normals face forwards.
+// If the edges match their opposites, but are not necessarily flat,
+// reorient normals may be used to attempt to compensate
+pub fn corner_flatten(normals: &NormalMatrix, size: &Vector2<usize>) -> NormalMatrix {
+    let top = normals.rows_range(0..size[0]);
+    let bottom = normals.rows_range(normals.nrows() - size[0]..normals.nrows());
+    let left = normals.rows_with_step(0, size[1], size[0]);
+    let right = normals.rows_with_step(size[0] - 1, size[1]-1, size[0]);
+    let upper_left =
+        top.rows_range(0..top.nrows()/2).row_sum() +
+        left.rows_range(0..left.nrows()/2).row_sum();
+    let upper_left = upper_left.normalize().transpose();
+    let lower_left =
+        bottom.rows_range(0..bottom.nrows()/2).row_sum() +
+        left.rows_range(left.nrows()/2..left.nrows()).row_sum();
+    let lower_left = lower_left.normalize().transpose();
+    let upper_right =
+        top.rows_range(top.nrows()/2..top.nrows()).row_sum() +
+        right.rows_range(0..left.nrows()/2).row_sum();
+    let upper_right = upper_right.normalize().transpose();
+    let lower_right =
+        bottom.rows_range(bottom.nrows()/2..bottom.nrows()).row_sum() +
+        right.rows_range(right.nrows()/2..right.nrows()).row_sum();
+    let lower_right = lower_right.normalize().transpose();
+    normal_tilt(normals, size, &upper_left, &upper_right, &lower_left, &lower_right)
+}
+
 // Finds the average normal of the top, bottom, left, and right of the image.
 // Normals are then rotated with linear interpolation between the edges.
 // Note that this assumes edge normals face forwards.
 // If the edges match their opposites, but are not necessarily flat,
 // reorient normals may be used to attempt to compensate
-pub fn edge_flatten(normals: &DMatrix<f32>, size: &Vector2<usize>) -> DMatrix<f32> {
+pub fn edge_flatten(normals: &NormalMatrix, size: &Vector2<usize>) -> NormalMatrix {
     let i_to_xy = |i: usize| (i % size[0], i / size[0]);
     let top = normals.view_range(0..size[0], 0..3)
         .row_mean()
