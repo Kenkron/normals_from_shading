@@ -60,11 +60,11 @@ pub fn brightness_tilt(
     result
 }
 
-// Finds the average normal corners of the edges of the image.
-// Normals are then rotated with linear interpolation between the corners.
-// Note that this assumes edge normals face forwards.
-// If the edges match their opposites, but are not necessarily flat,
-// reorient normals may be used to attempt to compensate
+// Attempts to adjust for non-uniform brightness by balancing the pixels
+// along the edge of the image corners, and adjusting the brightness so
+// their averages match.
+// Currently, the flattening only approaches average,
+// it doesn't make it in a single step, so it may need repeating.
 pub fn corner_flatten(image_data: &DynamicImage) -> DynamicImage {
     let size =
         Vector2::new(
@@ -112,6 +112,11 @@ pub fn corner_flatten(image_data: &DynamicImage) -> DynamicImage {
     brightness_tilt(image_data, relative_ul, relative_ur, relative_ll, right_lr)
 }
 
+// Attempts to adjust for non-uniform brightness by balancing the pixels
+// around the corners of the image, with higher weigths for pixels close
+// to the corner, and adjusting the brightness so their averages match.
+// Currently, the flattening only approaches average,
+// it doesn't make it in a single step, so it may need repeating.
 pub fn corner_weight_flatten(image_data: &DynamicImage) -> DynamicImage {
     let (width, height) = (image_data.width(), image_data.height());
     let mut grayscale = image_data.grayscale();
