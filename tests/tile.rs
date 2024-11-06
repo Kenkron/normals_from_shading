@@ -29,9 +29,9 @@ fn albedo_generation() {
     let mut images = Vec::<DynamicImage>::new();
 
     let args = vec![
-        "sample_input/tile_2048_a.jpg",
-        "sample_input/tile_2048_b.jpg",
-        "sample_input/tile_2048_c.jpg"
+        "sample_input/tile_512_a.jpg",
+        "sample_input/tile_512_b.jpg",
+        "sample_input/tile_512_c.jpg"
     ];
 
     // Load images
