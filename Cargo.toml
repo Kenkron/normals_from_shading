@@ -3,6 +3,10 @@ name = "normals_from_shading"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name="normals_from_shading"
+path="src/lib.rs"
+
 [profile.dev]
 opt-level = 0   # Keep your project in debug mode with no optimizations
 

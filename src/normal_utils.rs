@@ -1,6 +1,65 @@
 use na::{DMatrix, Matrix3, Rotation3, Vector2, Vector3};
 
+use crate::radiance_map::*;
+
 pub type NormalMatrix = na::Matrix<f32, na::Dyn, na::U3, na::VecStorage<f32, na::Dyn, na::U3>>;
+
+/// Find linear least squares solution to Ax = b
+/// This will return None for an underconstrained system.
+pub fn least_squares(a: &NormalMatrix, b: &RadianceMatrix) -> Option<Vector3<f32>> {
+    let a_transpose = a.transpose();
+    let ata = &a_transpose * a;
+    let atb = &a_transpose * b;
+
+    let inv_ata = ata.try_inverse()?;
+    Some(inv_ata * atb)
+}
+
+/// Estimating a lighting direction by finding the least squares solution
+/// for (light_direction) of (normals)(light_directions) = (brightness_values)
+/// This is based on phong diffuse shading.
+///
+/// The normal matrix must be an n x 3 matrix where n is the pixel count, and
+/// each row holds the xyz values of the normal. The radiance vector is an
+/// n x 1 matrix holding brightness data for each pixel.
+pub fn generate_lighting_direction(
+    normal_matrix: &NormalMatrix,
+    radiance_vector: &RadianceMatrix)
+-> Vector3<f32> {
+    // least squares solution for normal * light_direction = radiance;
+    let light_direction =
+        least_squares(&normal_matrix, &radiance_vector)
+            .expect("Could not find least squares for lighting direction")
+            .normalize();
+
+    // return as vec3
+    Vector3::<f32>::from_column_slice(light_direction.as_slice())
+}
+
+/// Using a set of radiance maps, including brightness and
+/// light direction, attempts to estimate the normal direction
+/// of each pixel by finding the least squares solution
+/// for (normals) of (light_directions)(normals) = (brightness_values).
+/// This is based on phong diffuse shading.
+pub fn generate_normals(radiance_maps: &[RadianceMap]) -> NormalMatrix {
+    // perform a least squares for each pixel
+    let normals: Vec<f32> = (0..radiance_maps[0].size.product()).map(|pixel| {
+        let mut light_directions: Vec<f32> = Vec::new();
+        let mut radiances: Vec<f32> = Vec::new();
+        for radiance_map in radiance_maps {
+            light_directions.extend_from_slice(radiance_map.lighting_direction.as_slice());
+            radiances.push(radiance_map.radiance[pixel]);
+        }
+        let light_directions = NormalMatrix::from_row_slice(&light_directions);
+        let radiances = RadianceMatrix::from_row_slice(&radiances);
+        let least_squares_normal = least_squares(
+            &light_directions,
+            &radiances);
+        Vec::from(least_squares_normal.expect("Could not find least squares for normal map").normalize().as_slice())
+    }).flatten().collect();
+
+    NormalMatrix::from_row_slice(&normals)
+}
 
 // Rotates normals so their average points upwards
 pub fn reorient_normals(normals: &NormalMatrix) -> NormalMatrix {
