@@ -150,14 +150,3 @@ pub fn corner_weight_flatten(image_data: &DynamicImage) -> DynamicImage {
         weight_sums.iter().map(|w| w/average_weight).collect();
     brightness_tilt(image_data, weights[0], weights[1], weights[2], weights[3])
 }
-
-/// Attempts to generate an albedo map by averaging and
-/// flattening a slice of images.
-pub fn generate_albedo(images: &[DynamicImage]) -> Option<DynamicImage> {
-    let average_image = average(images)?;
-    let mut flattened_average = average_image;
-    for _ in 0..10 {
-        flattened_average = corner_weight_flatten(&flattened_average);
-    }
-    Some(flattened_average)
-}
