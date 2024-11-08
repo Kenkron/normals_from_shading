@@ -20,7 +20,7 @@ impl From<image::DynamicImage> for RadianceMap {
         let size = Vector2::new(image_data.width() as usize, image_data.height() as usize);
         let greyscale: Vec<f32> = image_data.grayscale().pixels().map(|pixel| {
             // convert to greyscale float
-            pixel.2.0[0] as f32 / 255 as f32
+            pixel.2.0[0] as f32 / 255.0
         }).collect();
         Self {
             lighting_direction: Vector3::<f32>::z(),

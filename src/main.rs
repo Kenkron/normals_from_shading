@@ -10,14 +10,14 @@ fn main() {
     for path in &args[1..] {
         let image =
             ImageReader::open(path)
-            .expect(&format!("Could not open image: {}", path))
+            .unwrap_or_else(|_| panic!("Could not open image: {}", path))
             .decode()
-            .expect(&format!("Could not decode image: {}", path));
+            .unwrap_or_else(|_| panic!("Could not decode image: {}", path));
         images.push(image);
     }
 
     // Validate images
-    if images.len() == 0 {
+    if images.is_empty() {
         println!("No images provided");
         return;
     }

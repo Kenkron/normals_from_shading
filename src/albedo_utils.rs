@@ -1,16 +1,17 @@
 use image::{DynamicImage, GenericImage, GenericImageView, Rgba, RgbaImage};
-use na::{ComplexField, DMatrix, Vector2};
+use na::{DMatrix, Vector2};
 
 /// Averages the pixels in a slice of images
 pub fn average(images: &[DynamicImage]) -> Option<DynamicImage> {
-    let size = (images.get(0)?.width(), images.get(0)?.height());
+    let size = (images.first()?.width(), images.first()?.height());
+    // Sum the pixel bytes for all the images
     let mut images_sum = Vec::<f32>::new();
     for image in images {
-        let image_data: Vec<f32> = image.pixels().map(|pixel| {
+        let image_data: Vec<f32> = image.pixels().flat_map(|pixel| {
             // convert to greyscale float
             pixel.2.0.map(|x| x as f32)
-        }).flatten().collect();
-        if images_sum.len() == 0 {
+        }).collect();
+        if images_sum.is_empty() {
             images_sum = image_data;
         } else {
             images_sum =
@@ -19,6 +20,7 @@ pub fn average(images: &[DynamicImage]) -> Option<DynamicImage> {
                 .collect();
         }
     }
+    // Divide by the total number of images to get the average
     let images_average: Vec<u8> =
         images_sum.iter()
         .map(|x| (x / images.len() as f32) as u8)
@@ -72,7 +74,7 @@ pub fn corner_flatten(image_data: &DynamicImage) -> DynamicImage {
             image_data.height() as usize);
     let greyscale: Vec<f32> = image_data.grayscale().pixels().map(|pixel| {
         // convert to greyscale float
-        pixel.2.0[0] as f32 / 255 as f32
+        pixel.2.0[0] as f32 / 255.0
     }).collect();
     let radiance = DMatrix::from_row_slice(greyscale.len(), 1, &greyscale);
 

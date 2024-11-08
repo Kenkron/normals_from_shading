@@ -21,7 +21,7 @@ fn normal_map_generation() {
         images.push(image);
     }
 
-    generate_normal_map(&images);
+    let _ = generate_normal_map(&images);
 }
 
 #[test]
@@ -44,5 +44,5 @@ fn albedo_generation() {
         images.push(image);
     }
 
-    generate_albedo(&images);
+    let _ = generate_albedo(&images);
 }

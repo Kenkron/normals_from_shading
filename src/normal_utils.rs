@@ -28,7 +28,7 @@ pub fn generate_lighting_direction(
 -> Vector3<f32> {
     // least squares solution for normal * light_direction = radiance;
     let light_direction =
-        least_squares(&normal_matrix, &radiance_vector)
+        least_squares(normal_matrix, radiance_vector)
             .expect("Could not find least squares for lighting direction")
             .normalize();
 
@@ -43,7 +43,7 @@ pub fn generate_lighting_direction(
 /// This is based on phong diffuse shading.
 pub fn generate_normals(radiance_maps: &[RadianceMap]) -> NormalMatrix {
     // perform a least squares for each pixel
-    let normals: Vec<f32> = (0..radiance_maps[0].size.product()).map(|pixel| {
+    let normals: Vec<f32> = (0..radiance_maps[0].size.product()).flat_map(|pixel| {
         let mut light_directions: Vec<f32> = Vec::new();
         let mut radiances: Vec<f32> = Vec::new();
         for radiance_map in radiance_maps {
@@ -55,8 +55,12 @@ pub fn generate_normals(radiance_maps: &[RadianceMap]) -> NormalMatrix {
         let least_squares_normal = least_squares(
             &light_directions,
             &radiances);
-        Vec::from(least_squares_normal.expect("Could not find least squares for normal map").normalize().as_slice())
-    }).flatten().collect();
+        Vec::from(
+            least_squares_normal
+                .expect("Could not find least squares for normal map")
+                .normalize()
+                .as_slice())
+    }).collect();
 
     NormalMatrix::from_row_slice(&normals)
 }
@@ -109,7 +113,7 @@ pub fn normal_tilt(
         let rotation_matrix =
             DMatrix::from_column_slice(3, 3, rotation_matrix_3.as_slice());
         let aligned_normal =
-            (rotation_matrix * &result.row(i).transpose()).transpose().normalize();
+            (rotation_matrix * result.row(i).transpose()).transpose().normalize();
         result.set_row(i, &aligned_normal.row(0));
     }
     result
@@ -184,7 +188,7 @@ pub fn edge_flatten(normals: &NormalMatrix, size: &Vector2<usize>) -> NormalMatr
         let rotation_matrix =
             DMatrix::from_column_slice(3, 3, rotation_matrix_3.as_slice());
         let aligned_normal =
-            (rotation_matrix * &result.row(i).transpose()).transpose();
+            (rotation_matrix * result.row(i).transpose()).transpose();
         result.set_row(i, &aligned_normal.row(0));
     }
     result
