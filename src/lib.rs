@@ -1,5 +1,5 @@
-pub mod normal_utils;
 pub mod albedo_utils;
+pub mod normal_utils;
 pub mod radiance_map;
 
 use image::{DynamicImage, RgbImage};
@@ -13,8 +13,7 @@ pub fn generate_normal_map(images: &[DynamicImage]) -> Result<DynamicImage, Stri
     if images.is_empty() {
         return Err("No images provided".to_string());
     }
-    let size =
-        Vector2::new(images[0].width() as usize, images[0].height() as usize);
+    let size = Vector2::new(images[0].width() as usize, images[0].height() as usize);
 
     // Initialize maps
     let mut radiance_maps = Vec::<RadianceMap>::new();
@@ -29,20 +28,21 @@ pub fn generate_normal_map(images: &[DynamicImage]) -> Result<DynamicImage, Stri
                 Vector3::new(
                     x as f32 - size[0] as f32 / 2.0,
                     y as f32 - size[1] as f32 / 2.0,
-                    size[0].max(size[1]) as f32)
-                    .normalize()
-                    .as_slice()
+                    size[0].max(size[1]) as f32,
+                )
+                .normalize()
+                .as_slice(),
             );
         }
     }
 
-    let mut normal_matrix =
-        NormalMatrix::from_row_slice(&initial_normal_map);
+    let mut normal_matrix = NormalMatrix::from_row_slice(&initial_normal_map);
 
     for _ in 0..4 {
         // Generate new radiance maps
         for radiance_map in &mut radiance_maps {
-            let est_light_direction = generate_lighting_direction(&normal_matrix, &radiance_map.radiance);
+            let est_light_direction =
+                generate_lighting_direction(&normal_matrix, &radiance_map.radiance);
             radiance_map.lighting_direction = est_light_direction;
         }
         // Generate new normal maps
@@ -53,7 +53,7 @@ pub fn generate_normal_map(images: &[DynamicImage]) -> Result<DynamicImage, Stri
     }
 
     for radiance_map in &radiance_maps {
-        println!("Est light direction: {}" , radiance_map.lighting_direction);
+        println!("Est light direction: {}", radiance_map.lighting_direction);
     }
 
     // Flatten normal map
@@ -65,12 +65,14 @@ pub fn generate_normal_map(images: &[DynamicImage]) -> Result<DynamicImage, Stri
     }
 
     // Write flattened normal map
-    let normal_bytes: Vec<u8> = flattened_normals.transpose().iter().map(|channel| {
-        (channel * 128.0 + 128.0) as u8
-    }).collect();
+    let normal_bytes: Vec<u8> = flattened_normals
+        .transpose()
+        .iter()
+        .map(|channel| (channel * 128.0 + 128.0) as u8)
+        .collect();
     let normal_output = match RgbImage::from_vec(size[0] as u32, size[1] as u32, normal_bytes) {
         None => Err("Normal output wasn't the right size".to_string()),
-        Some(x) => Ok(x)
+        Some(x) => Ok(x),
     }?;
     Ok(normal_output.into())
 }
