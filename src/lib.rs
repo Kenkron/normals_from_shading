@@ -21,6 +21,9 @@ pub fn generate_normal_map(images: &[DynamicImage]) -> Result<DynamicImage, Stri
         radiance_maps.push(RadianceMap::from(image.to_owned()));
     }
 
+    // Balance radiance maps to have the same average brightness
+    radiance_maps = balance_radiances(&radiance_maps);
+
     let mut initial_normal_map = Vec::<f32>::new();
     for y in 0..size[1] {
         for x in 0..size[0] {

@@ -53,3 +53,21 @@ impl RadianceMap {
         Ok(result)
     }
 }
+
+pub fn balance_radiances(radiance_maps: &[RadianceMap]) -> Vec<RadianceMap> {
+    let average_radiances = radiance_maps.iter().map(
+        |radiances| radiances.radiance.mean()
+    );
+    let average_radiance: f32 = average_radiances.clone().sum();
+    radiance_maps
+        .iter()
+        .zip(average_radiances)
+        .map(|(radiance, average)| {
+            RadianceMap {
+                lighting_direction: radiance.lighting_direction,
+                size: radiance.size,
+                radiance: radiance.radiance.scale(average_radiance/average)
+            }
+        })
+        .collect()
+}
