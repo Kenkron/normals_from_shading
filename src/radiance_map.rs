@@ -1,4 +1,4 @@
-use image::{self, GenericImageView, ImageReader, ImageResult};
+use image::{self, GenericImageView, ImageReader, ImageResult, RgbImage};
 use na::{Vector2, Vector3};
 
 pub type RadianceMatrix = na::Matrix<f32, na::Dyn, na::U1, na::VecStorage<f32, na::Dyn, na::U1>>;
@@ -52,21 +52,42 @@ impl RadianceMap {
         result.lighting_direction = light_direction;
         Ok(result)
     }
+    pub fn export(&self, path: &str) -> Result<(), String>{
+        // Write flattened normal map
+        let image_bytes: Vec<u8> = self.radiance
+            .transpose()
+            .iter()
+            .flat_map(|channel| {
+                vec![(channel * 256.0) as u8; 3]
+            })
+            .collect();
+        let output_image = match RgbImage::from_vec(self.size[0] as u32, self.size[1] as u32, image_bytes) {
+            None => Err("Output wasn't the right size".to_string()),
+            Some(x) => Ok(x),
+        }?;
+        output_image
+            .save(path)
+            .expect("Error saving albedo");
+        Ok(())
+    }
 }
 
 pub fn balance_radiances(radiance_maps: &[RadianceMap]) -> Vec<RadianceMap> {
     let average_radiances = radiance_maps.iter().map(
         |radiances| radiances.radiance.mean()
     );
-    let average_radiance: f32 = average_radiances.clone().sum();
+    let total_sum: f32 = average_radiances.clone().sum();
+    let total_average = total_sum / radiance_maps.len() as f32;
+    println!("total avg:{}", total_average);
     radiance_maps
         .iter()
         .zip(average_radiances)
-        .map(|(radiance, average)| {
+        .map(|(radiance, local_average)| {
+            println!("local avg: {}", local_average);
             RadianceMap {
                 lighting_direction: radiance.lighting_direction,
                 size: radiance.size,
-                radiance: radiance.radiance.scale(average_radiance/average)
+                radiance: radiance.radiance.scale(total_average/local_average)
             }
         })
         .collect()

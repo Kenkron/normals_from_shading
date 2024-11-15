@@ -2,6 +2,7 @@ pub mod albedo_utils;
 pub mod normal_utils;
 pub mod radiance_map;
 
+use albedo_utils::corner_flatten;
 use image::{DynamicImage, RgbImage};
 use na::{Vector2, Vector3};
 extern crate nalgebra as na;
@@ -18,7 +19,11 @@ pub fn generate_normal_map(images: &[DynamicImage]) -> Result<DynamicImage, Stri
     // Initialize maps
     let mut radiance_maps = Vec::<RadianceMap>::new();
     for image in images {
-        radiance_maps.push(RadianceMap::from(image.to_owned()));
+        radiance_maps.push(RadianceMap::from(image.clone()));
+    }
+
+    for i in 0..images.len() {
+        radiance_maps[i].export(&format!("{}.jpg", i))?;
     }
 
     // Balance radiance maps to have the same average brightness
@@ -61,8 +66,8 @@ pub fn generate_normal_map(images: &[DynamicImage]) -> Result<DynamicImage, Stri
 
     // Flatten normal map
     let mut flattened_normals = normal_matrix;
-    for _ in 0..10 {
-        flattened_normals = normal_utils::corner_flatten(&flattened_normals, &size);
+    for _ in 0..2 {
+        flattened_normals = normal_utils::edge_flatten(&flattened_normals, &size);
         // Reorient the normal map to face towards the camera
         flattened_normals = normal_utils::reorient_normals(&flattened_normals);
     }
@@ -83,7 +88,8 @@ pub fn generate_normal_map(images: &[DynamicImage]) -> Result<DynamicImage, Stri
 /// Attempts to generate an albedo map by averaging and
 /// flattening a slice of images.
 pub fn generate_albedo(images: &[DynamicImage]) -> Option<DynamicImage> {
-    let average_image = albedo_utils::average(images)?;
+    let flattened_images: Vec<_> = images.iter().map(|image| albedo_utils::corner_flatten(image)).collect();
+    let average_image = albedo_utils::average(&flattened_images)?;
     let mut flattened_average = average_image;
     for _ in 0..10 {
         flattened_average = albedo_utils::corner_weight_flatten(&flattened_average);
